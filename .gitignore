@@ -1,0 +1,9 @@
+# Ignore the actual_creds directory and all its contents
+actual_creds/
+
+# Ignore __pycache__ directories at any level
+*/__pycache__/
+
+
+# Ignore the archived directory and all its contents
+archived/

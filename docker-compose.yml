@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    env_file:
+      - redis.env.app
+
+
+  mongo:
+    image: mongo:5.0.6
+    volumes:
+      - mongo-db:/data/db
+    env_file:
+      - mongo.env.app
+    ports:
+      - "27016:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672" # RabbitMQ Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    env_file:
+      - rabbitmq.env.app
+
+
+  postgres:
+    image: postgres:13
+    env_file:
+      - postgres.env.app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+  auth-app:
+    # image: pritamsarkardocker/auth
+    build: ./auth/
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis 
+    env_file:
+      - auth.env.app
+      
+
+  converter-app:
+    # image: pritamsarkardocker/converter
+    build: ./converter/
+    depends_on:
+      - mongo
+      - rabbitmq
+      - gateway-app # Optional
+    env_file:
+      - converter.env.app
+      
+
+  gateway-app:
+    # image: pritamsarkardocker/getway
+    build: ./gateway/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-app
+      - mongo
+      - rabbitmq
+    env_file:
+      - gateway.env.app
+
+  notifier-app:
+    # image: pritamsarkardocker/notifier
+    build: ./notifier/
+    depends_on:
+      - rabbitmq
+    env_file:
+      - notifier.env.app
+      
+volumes:
+  postgres-db:
+  mongo-db:
+    driver: local
+  rabbitmq-data:
+    name: rabbitmq_data_volume
+
