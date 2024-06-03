@@ -6,12 +6,15 @@ import gridfs
 import pika
 from convert import to_mp3
 from config.config import Settings
+from utils.mp3_file_handler import handle_old_mp3_files
 from pymongo import MongoClient
+
+import threading
 
 def create_connection_and_start_consumption():
     channel = connection= mongo_client = None
     def callback(ch, method, properties, body):
-        err = to_mp3.start(body, fs_videos, fs_mp3s, ch)
+        err = to_mp3.start(body, fs_videos, fs_mp3s, ch, db_mp3_id_maps)
         if err:
             ch.basic_nack(delivery_tag=method.delivery_tag)  # negative acknowledge
         else:
@@ -22,7 +25,7 @@ def create_connection_and_start_consumption():
             mongo_client = MongoClient(
                 f"mongodb://{settings.mongo_username}:{ settings.mongo_password}@{settings.mongo_host}:{settings.mongo_port}"
             )
-
+            db_mp3_id_maps = mongo_client["mp3_id_maps"]
             db_videos = mongo_client.videos
             db_mp3s = mongo_client.mp3s
             # gridfs
@@ -69,7 +72,9 @@ def create_connection_and_start_consumption():
 
 if __name__ == "__main__":
     settings = Settings()
+    old_mp3_handler = threading.Thread(target=handle_old_mp3_files,args=(settings,))
     try:
+        old_mp3_handler.start()
         create_connection_and_start_consumption()
     except KeyboardInterrupt:
         print("Interrupted")

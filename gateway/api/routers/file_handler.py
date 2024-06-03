@@ -66,7 +66,7 @@ async def download(request: Request,fid: str=""):  # TODO
             out = fs.get(file_id)
             file_data = BytesIO(out.read())
             file_data.seek(0)
-            fs.delete(file_id)
+            # fs.delete(file_id)
             print(f'Deleted file with id {str(file_id)}')
         except Exception:
             raise Exception(f"File not found id {str(file_id)}")

@@ -1,0 +1,6 @@
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=admin
+RABBITMQ_PASSWORD=password
+EMAIL_FROM=youremail@gmail.com
+APP_PASSWORD=app-pass-wor-d
