@@ -72,7 +72,7 @@ def create_connection_and_start_consumption():
 
 if __name__ == "__main__":
     settings = Settings()
-    old_mp3_handler = threading.Thread(target=handle_old_mp3_files,args=(settings,))
+    old_mp3_handler = threading.Thread(target=handle_old_mp3_files,args=(settings,),daemon=True)
     try:
         old_mp3_handler.start()
         create_connection_and_start_consumption()
