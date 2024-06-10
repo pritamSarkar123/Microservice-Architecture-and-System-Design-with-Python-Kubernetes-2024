@@ -2,7 +2,7 @@ import httpx
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 
 from ..config import settings
-from ..schemas import AccessToken, RefreshToken, Token, User, UserReturn
+from ..schemas import AccessToken, RefreshToken, Token, User, UserReturn,TokenForValidationForPasswordReset
 from ..utils.rate_limit_handler import rate_limiter
 
 router = APIRouter(
@@ -56,6 +56,45 @@ async def refresh(request: Request, refresh_token: RefreshToken):
     response = httpx.post(
         f"{settings.auth_uri}/api/v1/auth/refresh",
         json={"refresh_token": refresh_token.refresh_token},
+    )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=response.json().get("detail"),
+        )
+    return response.json()
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+async def logout(request: Request, refresh_token: RefreshToken):
+    response = httpx.post(
+        f"{settings.auth_uri}/api/v1/auth/logout",
+        json={"refresh_token": refresh_token.refresh_token},
+    )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=response.json().get("detail"),
+        )
+    return response.json()
+
+@router.post("/forget-password", status_code=status.HTTP_200_OK)
+async def forget_password(request: Request, email: str = Form(...)):
+    response = httpx.post(
+        f"{settings.auth_uri}/api/v1/auth/forget-password?email={email}",
+    )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=response.json().get("detail"),
+        )
+    return response.json()
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+async def reset_password(request: Request, reset_data: TokenForValidationForPasswordReset):
+    response = httpx.post(
+        f"{settings.auth_uri}/api/v1/auth/reset-password?",
+        json={"token": reset_data.token, "new_password": reset_data.new_password},
     )
     if response.status_code != 200:
         raise HTTPException(

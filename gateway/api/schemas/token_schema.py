@@ -14,3 +14,9 @@ class RefreshToken(BaseModel):
 class AccessToken(BaseModel):
     access_token: str
     token_type: str
+
+
+
+class TokenForValidationForPasswordReset(BaseModel):
+    token: str
+    new_password: str
