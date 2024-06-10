@@ -1,0 +1,4 @@
+10/06/2024 
+1. reset password [currently create new user]
+	// send email with a token to the registered email id
+	// use the token and username and new password to reset the password 

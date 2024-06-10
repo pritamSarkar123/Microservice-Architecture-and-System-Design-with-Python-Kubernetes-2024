@@ -16,6 +16,8 @@ auth.env.app
     REFRESH_TOKEN_EXPIRE_HOURS=24
     REDIS_HOST=redis
     REDIS_PORT=6379
+    EMAIL_FROM=**registered email id <<go for gmail based>>
+    APP_PASSWORD=**app password for this gmail account
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 converter.env.app 
     RABBITMQ_HOST=rabbitmq

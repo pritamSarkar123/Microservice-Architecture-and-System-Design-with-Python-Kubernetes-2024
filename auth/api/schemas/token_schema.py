@@ -20,6 +20,10 @@ class TokenForValidation(BaseModel):
     token: str
 
 
+class TokenForValidationForPasswordReset(TokenForValidation):
+    new_password: str
+
+
 class TokenValidation(BaseModel):
     valid: bool
     admin: bool

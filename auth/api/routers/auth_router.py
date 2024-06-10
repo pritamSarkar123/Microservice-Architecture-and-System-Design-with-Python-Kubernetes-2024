@@ -11,6 +11,7 @@ from ..schemas import (
     RefreshToken,
     Token,
     TokenForValidation,
+    TokenForValidationForPasswordReset,
     TokenValidation,
     User,
     UserReturn,
@@ -20,9 +21,10 @@ from ..utils import (
     create_refresh_token,
     decode_token,
     get_password_hash,
+    rate_limiter,
+    send_email,
     verify_password,
 )
-from ..utils.rate_limit_handler import rate_limiter
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -153,3 +155,73 @@ async def validate_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return {"valid": True, "admin": adimin_user, "email": user_email}
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+@rate_limiter(max_requests=100, period=60)
+async def logout(request: Request, token: RefreshToken, db: Session = Depends(get_db)):
+    user = decode_token(token.refresh_token)
+    user_email = user["sub"]
+    adimin_user = user["admin"]
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == user_email, models.User.admin == adimin_user)
+        .first()
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {"message": "Successfully logged out"}
+
+
+@router.post("/forget-password", status_code=status.HTTP_200_OK)
+@rate_limiter(max_requests=100, period=60)
+async def forget_password(request: Request, email: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.email, "admin": user.admin},
+        expires_delta=access_token_expires,
+    )
+
+    status, message = await send_email(settings, access_token, user.email)
+    if not status:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=message,
+        )
+    return {"message": "Successfully sent email to reset password"}
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+@rate_limiter(max_requests=100, period=60)
+async def reset_password(
+    request: Request,
+    reset_data: TokenForValidationForPasswordReset,
+    db: Session = Depends(get_db),
+):
+    user = decode_token(reset_data.token)
+    user_email = user["sub"]
+    adimin_user = user["admin"]
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == user_email, models.User.admin == adimin_user)
+        .first()
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user.password = get_password_hash(reset_data.new_password)
+    db.commit()
+    return {"message": "Password reset successfully"}
