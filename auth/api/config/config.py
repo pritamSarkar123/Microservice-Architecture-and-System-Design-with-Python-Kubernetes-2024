@@ -8,9 +8,6 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     title: str
     version: str
-    host: str
-    port: int
-    scheme: str
 
     secret_key: Optional[str] = Field(default_factory=lambda: secrets.token_urlsafe(64))
     algorithm: Optional[str] = Field(default="HS256")

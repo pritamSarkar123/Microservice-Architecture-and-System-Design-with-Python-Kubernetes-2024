@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-configmap
+data:
+  TITLE: "Auth API Oauth2 bearer token based"
+  VERSION: "4.0.1"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+  REFRESH_TOKEN_EXPIRE_HOURS: "24"
+  
+  
+  
+  ## from redis 
+  # REDIS_HOST: redis-service
+  # REDIS_PORT: "6379"
+
+  ## from postgres
+  # DATABASE_HOSTNAME: postgres-service
+  # DATABASE_PORT: "5432"
+  # DATABASE_PASSWORD: root
+  # DATABASE_NAME: fastapi
+  # DATABASE_USERNAME: postgres
+  
+
+

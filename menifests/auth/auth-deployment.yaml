@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+  labels:
+    app: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: pritamsarkar123/vtm3_auth_kube_2024:latest
+          ports:
+            - containerPort: 5000
+
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: redis-url
+
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: redis-port
+            
+            - name: DATABASE_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configmap
+                  key: postgres-url
+            
+            - name: DATABASE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configmap
+                  key: postgres-port
+            
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configmap
+                  key: database-name
+
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: database-username
+            
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: database-password
+          
+          envFrom:
+            - configMapRef:
+                name: auth-configmap
+            - secretRef:
+                name: auth-secret

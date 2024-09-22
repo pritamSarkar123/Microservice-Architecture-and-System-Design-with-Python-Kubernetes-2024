@@ -41,7 +41,7 @@ services:
 
   auth-app:
     # image: pritamsarkardocker/auth
-    build: ./auth/
+    image: pritamsarkar123/vtm3_auth_kube_2024:latest
     ports:
       - "5000:5000"
     depends_on:
@@ -53,7 +53,7 @@ services:
 
   converter-app:
     # image: pritamsarkardocker/converter
-    build: ./converter/
+    image: pritamsarkar123/vtm3_converter_kube_2024:latest
     depends_on:
       - mongo
       - rabbitmq
@@ -64,7 +64,7 @@ services:
 
   gateway-app:
     # image: pritamsarkardocker/getway
-    build: ./gateway/
+    image: pritamsarkar123/vtm3_gateway_kube_2024:latest
     ports:
       - "8080:8080"
     depends_on:
@@ -76,7 +76,7 @@ services:
 
   notifier-app:
     # image: pritamsarkardocker/notifier
-    build: ./notifier/
+    image: pritamsarkar123/vtm3_notifier_kube_2024:latest
     depends_on:
       - rabbitmq
     env_file:

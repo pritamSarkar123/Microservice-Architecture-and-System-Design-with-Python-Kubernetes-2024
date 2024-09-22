@@ -1,0 +1,60 @@
+kubectl get namespaces
+
+
+kubectl create namespace rabbitmq
+
+
+# ConfigMaps
+kubectl get configmaps -n rabbitmq
+
+# Ingress
+kubectl get ingress -n rabbitmq
+
+# Persistent Volume Claims (PVC)
+kubectl get pvc -n rabbitmq
+
+# Secrets
+kubectl get secrets -n rabbitmq
+
+# Services
+kubectl get svc -n rabbitmq
+
+# StatefulSets
+kubectl get statefulsets -n rabbitmq
+
+
+# Ingress-nginx
+kubectl get pods -n ingress-nginx
+kubectl get svc -n ingress-nginx
+
+# minikube ip
+minikube ip
+
+
+# check the ingress of rabbitmq from local computer
+curl http://local-rabbitmq-manager.com
+
+
+
+# check running pods in minikube
+kubectl get pods -A
+
+# check the logs of a pod
+kubectl logs -f rabbitmq-statefulset-0 -n rabbitmq
+
+
+# check the ingress log of rabbitmq
+kubectl logs -f ingress-nginx-controller -n ingress-nginx | grep local-rabbitmq-manager.com
+
+
+# check the ingress log of rabbitmq
+kubectl logs -f ingress-nginx-controller -n ingress-nginx | grep local-rabbitmq-manager.com
+# In this case you need to check the ingress-nginx logs
+kubectl logs -f ingress-nginx-controller -n ingress-nginx
+after starting minikube tunnel after opening http://local-rabbitmq-manager.com I am getting "503 Service temporarily unavailable nginx", what to do? and which log should I check?
+
+
+# delete a namespace
+kubectl delete namespace <namespace_name>
+
+

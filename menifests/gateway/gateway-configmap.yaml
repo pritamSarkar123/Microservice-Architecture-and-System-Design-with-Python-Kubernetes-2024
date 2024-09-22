@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-configmap
+data:
+  TITLE: "Gateway For Video to Mp3"
+  VERSION: "0.0.1"
+  AUTH_URI: "http://auth-service:5000"
+
+  
+
+
+
+
+

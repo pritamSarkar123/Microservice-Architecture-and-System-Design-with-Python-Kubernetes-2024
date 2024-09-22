@@ -2,25 +2,42 @@
 1st recommended
 [Microservice Architecture and System Design with Python & Kubernetes – Full Course](https://www.youtube.com/watch?v=hmkF77F9TLw&t=112s)
 
+vary detailed and quality course
+
 ![Alt text](overview.png)
 
-* for gateway and auth app used fastapi
-* used rabbitmq for queue service 
-* used postgresql for auth and mongodb for video to mp3 conversion
-* ratelimiter added in gateway and auth service 
-* gateway -> auth sync communication
-* gateway -> converter -> notifier async communication using rabbitmq
-* Oauth2 using bearer token used in the auth service
-* docker in local system required 
 
-### steps to run the service 
-1. start the docker 
-2. clone the repo to a local dir 
-3. fill the env files
-4. run "docker-compose up -d"
-5. and look for it in http://localhost:8080
+### About
+* Gateway and auth service is based on [Fastapi](https://fastapi.tiangolo.com/)
+* Used rabbitmq for queue service 
+* Used dockerized postgresql,redis, rabbitmq and mongodb
+* Ratelimiter based on Redis is added on Gateway and Auth service 
+* Gateway to Auth sync communication
+* Gateway to converter to notifier async communication using rabbitmq
+* Oauth2 using bearer token used in the Auth service
+* Here we are using only one node {no replicas, you can check menifests and based on your requirement can change the number of replicas, keep in mind for mongo, postgres, redis, rabbitmq number of nodes mustbe exactly one. It is better to keep the number of nodes of gateway exactly one}
 
-### how to set env files values
+### Requirements
+* Some knoledge of basic python
+* Enable [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install)
+* [Docker desktop](https://www.docker.com/products/docker-desktop/), [K9s](https://github.com/derailed/k9s), [minikube](https://minikube.sigs.k8s.io/docs/start), [kubectl](https://kubernetes.io/docs/tasks/tools/) in local system required 
+* Windows 8gb ram, and 10gb of space
+
+
+
+### Steps to run the service
+#### Docker compose based
+1. Start the docker desktop 
+2. Clone the repo to a local dir 
+3. Update the env files
+4. Run "docker-compose up -d"
+5. For gateway go to [Gateway](http://localhost:8080)
+6. For rabbitmq management go to [RabbitMQ](http://localhost:15672)
+
+
+
+#### How to set env files values before docker compose ###
+** The files will be available inside of the docker-compose directory
 ```
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 auth.env.app
@@ -90,3 +107,33 @@ rabbitmq.env.app
 redis.env.app
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
+
+### Steps to run the service
+#### Minikube based
+1. Start docker desktop, minikube
+2. Clone the repo to a local dir 
+3. Follow commands.txt inside of the menifests directory
+4. Access the getway docs by clicking [Gateway](http://local-mp3converter.com/docs)
+5. Access the rabbitmq management by ckicking on [RabbitMQ](local-rabbitmq-manager.com)
+
+
+#### how to set env files values before starting the services in minikune ###
+```
+Update EMAIL_FORM and APP_PASSWORD present in /menifests/auth/auth-secrets and /menifests/notifier/notifier-secret
+EMAIL_FORM and APP_PASSWORD in both of the above mentioned places may or may not be same
+EG:
+    EMAIL_FROM: youraccount@gmail.com
+    APP_PASSWORD: xxxx-xxxx-xxx-xxx
+** both must be valid
+
+You can change other secrets also
+```
+[How to create app password?](https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237)
+
+
+
+## Pending developments
+1. reset password 
+	* send email with a new token to the registered email id
+	* use the token and username and new password to reset the password 
+2. delete the converted file from mongo after downloading

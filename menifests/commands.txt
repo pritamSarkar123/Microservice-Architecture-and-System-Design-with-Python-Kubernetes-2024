@@ -1,0 +1,90 @@
+/// 1st start the minikube
+1. start docker desktop
+2. start the minikube "minikube start"
+
+
+docker build --network=host . // *** ignore this line ***
+// to avoid pip blockage
+
+
+/// we need to map local-mp3converter.com to 127.0.0.1
+/// we need to map local-rabbitmq-manager.com to 127.0.0.1
+
+open in admin mode "C:\Windows\System32\drivers\etc\hosts"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# For example:
+#
+#      102.54.94.97     rhino.acme.com          # source server
+#       38.25.63.10     x.acme.com              # x client host
+          
+
+# localhost name resolution is handled within DNS itself.
+#	127.0.0.1       localhost
+#	::1             localhost
+# Added by Docker Desktop
+192.168.0.2 host.docker.internal
+192.168.0.2 gateway.docker.internal
+# To allow the same kube context to work on the host and the container:
+127.0.0.1 kubernetes.docker.internal
+127.0.0.1 local-mp3converter.com
+127.0.0.1 local-rabbitmq-manager.com
+# End of section
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// check you must be inside of the menifests folder
+cd menifests
+
+// the sequence is very important
+// also check k9s and wait until one service starts running
+kubectl apply -f ./redis/
+kubectl apply -f ./postgres/
+kubectl apply -f ./rabbitmq/
+kubectl apply -f ./mongo/
+kubectl apply -f ./auth/
+kubectl apply -f ./gateway/
+kubectl apply -f ./notifier/
+kubectl apply -f ./converter/
+
+
+
+
+/// drop everything
+kubectl delete deployment --all 
+kubectl delete service --all 
+kubectl delete secret --all 
+kubectl delete configmap --all 
+kubectl delete ingress --all 
+kubectl delete pvc --all 
+kubectl delete statefulset --all
+
+
+
+
+
+
+// enable required minikube addons
+minikube addons list 
+minikube addons enable ingress
+minikube addons enable ingress-dns
+minikube tunnel // closing it will stop the tunnel
+
+
+/// change number of replicas 
+// here for example taking gateway service  gateway-xyzv.. is the pod name, check pod name in the k9s
+kubectl scale deployment --replical=0 gateway-xyzv..
+
+
+
+// if you want to use the systems databases then can use 
+host.minikube.internal
+
+EG:--->
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-configmap
+data:
+  MYSQL_HOST: host.minikube.internal
+  MYSQL_USER: auth_user
+  MYSQL_DB: auth
+  MYSQL_PORT: "3306"
